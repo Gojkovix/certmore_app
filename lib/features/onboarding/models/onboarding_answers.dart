@@ -1,3 +1,5 @@
+import '../../../core/utils/date_format.dart';
+
 /// Odgovori iz onboardinga. Nespremenljiv razred — vsaka sprememba
 /// ustvari novo instanco s [copyWith], kar olajša sledenje stanju.
 class OnboardingAnswers {
@@ -53,12 +55,12 @@ class OnboardingAnswers {
   }
 
   Map<String, Object?> toJson() => {
-        'discovery': discovery?.name,
-        'goal': goal?.name,
-        'examTiming': examTiming?.name,
-        'examDate': examDate?.toIso8601String(),
-        'knowledge': knowledge?.name,
-      };
+    'discovery': discovery?.name,
+    'goal': goal?.name,
+    'examTiming': examTiming?.name,
+    'examDate': examDate?.toIso8601String(),
+    'knowledge': knowledge?.name,
+  };
 
   factory OnboardingAnswers.fromJson(Map<String, Object?> json) {
     T? byName<T extends Enum>(List<T> values, Object? name) =>
@@ -105,9 +107,7 @@ enum ExamTiming {
   final String label;
 
   static ExamTiming fromDate(DateTime date, {required DateTime today}) {
-    final days = DateTime(date.year, date.month, date.day)
-        .difference(DateTime(today.year, today.month, today.day))
-        .inDays;
+    final days = daysBetween(today, date);
     if (days <= 30) return within30Days;
     if (days <= 92) return within3Months;
     return later;
