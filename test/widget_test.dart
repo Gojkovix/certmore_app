@@ -92,8 +92,7 @@ void main() {
     await tester.tap(find.text('Nadaljuj'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Ustvari račun'), findsOneWidget);
-    expect(find.text('Cilj: Začenjam s pripravami.'), findsOneWidget);
+    expect(find.text('Že imaš račun? Prijava'), findsOneWidget);
   });
 
   testWidgets('sistemski nazaj vrača po korakih', (tester) async {

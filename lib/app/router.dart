@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../features/auth/presentation/auth_pending_screen.dart';
+import '../features/auth/presentation/register_screen.dart';
 import '../features/home/presentation/home_screen.dart';
-import '../features/onboarding/models/onboarding_answers.dart';
 import '../features/onboarding/presentation/onboarding_screen.dart';
 import '../features/welcome/presentation/welcome_screen.dart';
 
@@ -21,9 +21,7 @@ abstract final class AppRoutes {
 Route<dynamic> onGenerateRoute(RouteSettings settings) {
   final Widget page = switch (settings.name) {
     AppRoutes.onboarding => const OnboardingScreen(),
-    AppRoutes.register => AuthPendingScreen.register(
-      answers: settings.arguments as OnboardingAnswers?,
-    ),
+    AppRoutes.register => const RegisterScreen(),
     AppRoutes.login => const AuthPendingScreen.login(),
     AppRoutes.home => const HomeScreen(),
     _ => const WelcomeScreen(),
