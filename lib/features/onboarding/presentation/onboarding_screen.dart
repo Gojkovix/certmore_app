@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/app_scope.dart';
 import '../../../app/router.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_spacing.dart';
@@ -29,6 +30,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   int _step = 0;
   OnboardingAnswers _answers = const OnboardingAnswers();
   bool _completing = false;
+  bool _restored = false;
+
+  /// InheritedWidget (AppScope) v initState še ni dostopen,
+  /// zato prejšnje odgovore naložimo tukaj — samo enkrat.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_restored) return;
+    _restored = true;
+    _answers = AppScope.of(context).onboardingStore.load() ?? _answers;
+  }
 
   bool get _isLastStep => _step == _stepCount - 1;
 
@@ -39,7 +51,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     _ => _answers.knowledge != null,
   };
 
-  void _update(OnboardingAnswers answers) => setState(() => _answers = answers);
+  /// Vsako izbiro takoj shranimo, da se ob zaprtju aplikacije ne izgubi.
+  void _update(OnboardingAnswers answers) {
+    setState(() => _answers = answers);
+    AppScope.of(context).onboardingStore.save(answers);
+  }
 
   void _next() {
     if (!_canContinue) return;
@@ -63,7 +79,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Future<void> _complete() async {
     if (_completing) return;
     _completing = true;
-    await Navigator.pushNamed(context, AppRoutes.register, arguments: _answers);
+    await Navigator.pushNamed(context, AppRoutes.register);
     _completing = false;
   }
 
