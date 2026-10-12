@@ -51,6 +51,28 @@ class OnboardingAnswers {
       knowledge: knowledge,
     );
   }
+
+  Map<String, Object?> toJson() => {
+        'discovery': discovery?.name,
+        'goal': goal?.name,
+        'examTiming': examTiming?.name,
+        'examDate': examDate?.toIso8601String(),
+        'knowledge': knowledge?.name,
+      };
+
+  factory OnboardingAnswers.fromJson(Map<String, Object?> json) {
+    T? byName<T extends Enum>(List<T> values, Object? name) =>
+        values.where((v) => v.name == name).firstOrNull;
+    final examDate = json['examDate'] as String?;
+
+    return OnboardingAnswers(
+      discovery: byName(DiscoverySource.values, json['discovery']),
+      goal: byName(PreparationGoal.values, json['goal']),
+      examTiming: byName(ExamTiming.values, json['examTiming']),
+      examDate: examDate == null ? null : DateTime.tryParse(examDate),
+      knowledge: byName(KnowledgeLevel.values, json['knowledge']),
+    );
+  }
 }
 
 enum DiscoverySource {
