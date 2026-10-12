@@ -23,6 +23,10 @@ class _LoginScreenState extends State<LoginScreen> {
   final _password = TextEditingController();
 
   bool _loading = false;
+
+  /// Po prvem poskusu oddaje se polja preverjajo sproti, da napaka
+  /// izgine takoj, ko je vnos popravljen.
+  bool _submitted = false;
   String? _error;
 
   @override
@@ -34,7 +38,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _submit() async {
     if (_loading) return;
-    setState(() => _error = null);
+    setState(() {
+      _error = null;
+      _submitted = true;
+    });
     if (!_formKey.currentState!.validate()) return;
 
     FocusScope.of(context).unfocus();
@@ -74,6 +81,9 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Form(
       key: _formKey,
+      autovalidateMode: _submitted
+          ? AutovalidateMode.onUserInteraction
+          : AutovalidateMode.disabled,
       child: AutofillGroup(
         child: AuthFormLayout(
           title: 'Dobrodošel nazaj.',
