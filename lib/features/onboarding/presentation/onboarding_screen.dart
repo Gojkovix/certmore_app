@@ -105,10 +105,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 child: OnboardingProgress(step: _step, total: _stepCount),
               ),
               Expanded(
+                // Prejšnji korak hitro zbledi, novi se pojavi takoj, a
+                // njegovi elementi (FadeSlideIn) počakajo, da stari izgine —
+                // besedili se tako nikoli ne prekrivata.
                 child: AnimatedSwitcher(
                   duration: AppMotion.page,
-                  reverseDuration: const Duration(milliseconds: 140),
-                  switchInCurve: AppMotion.standard,
+                  reverseDuration: _ChoiceStep.exitDuration,
+                  switchInCurve: const Threshold(0),
                   switchOutCurve: Curves.easeInCubic,
                   layoutBuilder: (current, previous) => Stack(
                     alignment: Alignment.topLeft,
@@ -253,7 +256,11 @@ class _ChoiceStep<T> extends StatelessWidget {
   final ValueChanged<T> onSelect;
   final Widget? footer;
 
+  /// Koliko časa potrebuje prejšnji korak, da zbledi.
+  static const exitDuration = Duration(milliseconds: 140);
   static const _stagger = Duration(milliseconds: 35);
+
+  Duration _delay(int order) => exitDuration + _stagger * order;
 
   @override
   Widget build(BuildContext context) {
@@ -268,6 +275,7 @@ class _ChoiceStep<T> extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           FadeSlideIn(
+            delay: _delay(0),
             child: Semantics(
               header: true,
               liveRegion: true,
@@ -276,14 +284,14 @@ class _ChoiceStep<T> extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.xs),
           FadeSlideIn(
-            delay: _stagger,
+            delay: _delay(1),
             child: Text(hint, style: AppTypography.bodySecondary),
           ),
           const SizedBox(height: AppSpacing.xxl),
           for (final (i, value) in values.indexed) ...[
             if (i > 0) const SizedBox(height: AppSpacing.sm - 2),
             FadeSlideIn(
-              delay: _stagger * (i + 2),
+              delay: _delay(i + 2),
               child: SelectionOption(
                 label: labelOf(value),
                 selected: isSelected(value),
@@ -294,7 +302,7 @@ class _ChoiceStep<T> extends StatelessWidget {
           if (footer != null) ...[
             const SizedBox(height: AppSpacing.lg),
             FadeSlideIn(
-              delay: _stagger * (values.length + 2),
+              delay: _delay(values.length + 2),
               child: footer!,
             ),
           ],
