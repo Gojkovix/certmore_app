@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../features/auth/presentation/auth_pending_screen.dart';
+import '../features/auth/presentation/login_screen.dart';
 import '../features/auth/presentation/register_screen.dart';
 import '../features/home/presentation/home_screen.dart';
 import '../features/onboarding/presentation/onboarding_screen.dart';
@@ -22,7 +22,7 @@ Route<dynamic> onGenerateRoute(RouteSettings settings) {
   final Widget page = switch (settings.name) {
     AppRoutes.onboarding => const OnboardingScreen(),
     AppRoutes.register => const RegisterScreen(),
-    AppRoutes.login => const AuthPendingScreen.login(),
+    AppRoutes.login => const LoginScreen(),
     AppRoutes.home => const HomeScreen(),
     _ => const WelcomeScreen(),
   };
