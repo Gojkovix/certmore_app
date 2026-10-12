@@ -1,30 +1,120 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
+import 'package:certmore/app/app.dart';
+import 'package:certmore/features/onboarding/presentation/widgets/selection_option.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:certmore/main.dart';
+/// Testi tečejo z vklopljenim "zmanjšaj gibanje", zato se typewriter ne
+/// vrti in pumpAndSettle zanesljivo konča.
+Future<void> _pumpApp(WidgetTester tester) async {
+  tester.platformDispatcher.accessibilityFeaturesTestValue =
+      const FakeAccessibilityFeatures(disableAnimations: true);
+  addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
+  await tester.pumpWidget(const CertmoreApp());
+  await tester.pumpAndSettle();
+}
+
+Finder _continueButton() => find.ancestor(
+      of: find.text('Nadaljuj'),
+      matching: find.byType(InkWell),
+    );
+
+bool _isEnabled(WidgetTester tester) =>
+    tester.widget<InkWell>(_continueButton()).onTap != null;
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const CertmoreApp());
+  testWidgets('welcome prikaže statično frazo in oba gumba', (tester) async {
+    await _pumpApp(tester);
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    expect(find.textContaining('Tvoje znanje. Preverjeno.'), findsWidgets);
+    expect(find.text('Začnimo'), findsOneWidget);
+    expect(find.text('Prijava'), findsOneWidget);
+  });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
+  testWidgets('onboarding: izbira, napredovanje in ohranjanje odgovorov', (
+    tester,
+  ) async {
+    await _pumpApp(tester);
+    await tester.tap(find.text('Začnimo'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Kako si izvedel za Certmore?'), findsOneWidget);
+    expect(find.text('01 / 04'), findsOneWidget);
+    expect(_isEnabled(tester), isFalse);
+
+    await tester.tap(find.text('Google'));
     await tester.pump();
+    expect(_isEnabled(tester), isTrue);
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    await tester.tap(find.text('Nadaljuj'));
+    await tester.pumpAndSettle();
+    expect(find.text('Kaj želiš doseči?'), findsOneWidget);
+    expect(_isEnabled(tester), isFalse);
+
+    // Nazaj: prejšnja izbira mora ostati označena.
+    await tester.tap(find.byTooltip('Nazaj'));
+    await tester.pumpAndSettle();
+    final google = tester.widget<SelectionOption>(
+      find.widgetWithText(SelectionOption, 'Google'),
+    );
+    expect(google.selected, isTrue);
+    expect(_isEnabled(tester), isTrue);
+
+    // Celoten tok do registracije.
+    await tester.tap(find.text('Nadaljuj'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Začenjam s pripravami.'));
+    await tester.pump();
+    await tester.tap(find.text('Nadaljuj'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Kdaj imaš strokovni izpit?'), findsOneWidget);
+    await tester.tap(find.text('Datuma še ne poznam.'));
+    await tester.pump();
+    await tester.tap(find.text('Nadaljuj'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('04 / 04'), findsOneWidget);
+    await tester.tap(find.text('Nekaj že znam.'));
+    await tester.pump();
+    await tester.tap(find.text('Nadaljuj'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Ustvari račun'), findsOneWidget);
+    expect(find.text('Cilj: Začenjam s pripravami.'), findsOneWidget);
+  });
+
+  testWidgets('sistemski nazaj vrača po korakih', (tester) async {
+    await _pumpApp(tester);
+    await tester.tap(find.text('Začnimo'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Instagram'));
+    await tester.pump();
+    await tester.tap(find.text('Nadaljuj'));
+    await tester.pumpAndSettle();
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.text('Kako si izvedel za Certmore?'), findsOneWidget);
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.text('Začnimo'), findsOneWidget);
+  });
+
+  testWidgets('majhen zaslon z veliko pisavo se ne prelije', (tester) async {
+    tester.view.physicalSize = const Size(320, 568) * 2;
+    tester.view.devicePixelRatio = 2;
+    tester.platformDispatcher.textScaleFactorTestValue = 1.6;
+    addTearDown(tester.view.reset);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+    await _pumpApp(tester);
+    expect(tester.takeException(), isNull);
+
+    await tester.ensureVisible(find.text('Začnimo'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Začnimo'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
   });
 }
