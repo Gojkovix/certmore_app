@@ -16,6 +16,7 @@ class PillButton extends StatefulWidget {
     required this.onPressed,
     this.variant = PillButtonVariant.primary,
     this.trailingIcon,
+    this.loading = false,
   });
 
   const PillButton.secondary({
@@ -23,6 +24,7 @@ class PillButton extends StatefulWidget {
     required this.label,
     required this.onPressed,
     this.trailingIcon,
+    this.loading = false,
   }) : variant = PillButtonVariant.secondary;
 
   final String label;
@@ -32,6 +34,10 @@ class PillButton extends StatefulWidget {
   final PillButtonVariant variant;
   final IconData? trailingIcon;
 
+  /// Med nalaganjem gumb obdrži barvo, pokaže indikator in ne sprejema
+  /// pritiskov — tako preprečimo dvojno oddajo obrazca.
+  final bool loading;
+
   @override
   State<PillButton> createState() => _PillButtonState();
 }
@@ -39,10 +45,10 @@ class PillButton extends StatefulWidget {
 class _PillButtonState extends State<PillButton> {
   bool _pressed = false;
 
-  bool get _enabled => widget.onPressed != null;
+  bool get _enabled => widget.onPressed != null && !widget.loading;
 
   (Color, Color) get _colors {
-    if (!_enabled) return (AppColors.border, AppColors.muted);
+    if (widget.onPressed == null) return (AppColors.border, AppColors.muted);
     return switch (widget.variant) {
       PillButtonVariant.primary => (AppColors.navy, Colors.white),
       PillButtonVariant.secondary => (AppColors.soft, AppColors.navy),
@@ -65,6 +71,7 @@ class _PillButtonState extends State<PillButton> {
     return Semantics(
       button: true,
       enabled: _enabled,
+      label: widget.loading ? '${widget.label}, nalaganje' : null,
       child: AnimatedScale(
         scale: _pressed ? 0.985 : 1,
         duration: AppMotion.press,
@@ -79,7 +86,7 @@ class _PillButtonState extends State<PillButton> {
           child: Material(
             type: MaterialType.transparency,
             child: InkWell(
-              onTap: widget.onPressed,
+              onTap: _enabled ? widget.onPressed : null,
               onHighlightChanged: (value) => setState(() => _pressed = value),
               customBorder: const StadiumBorder(),
               splashFactory: NoSplash.splashFactory,
@@ -97,24 +104,27 @@ class _PillButtonState extends State<PillButton> {
                     child: AnimatedDefaultTextStyle(
                       duration: AppMotion.selection,
                       style: AppTypography.button.copyWith(color: foreground),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Flexible(
-                            child: Text(
-                              widget.label,
-                              textAlign: TextAlign.center,
+                      child: _withLoading(
+                        foreground,
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                widget.label,
+                                textAlign: TextAlign.center,
+                              ),
                             ),
-                          ),
-                          if (widget.trailingIcon != null) ...[
-                            const SizedBox(width: AppSpacing.xs),
-                            Icon(
-                              widget.trailingIcon,
-                              size: 18,
-                              color: foreground,
-                            ),
+                            if (widget.trailingIcon != null) ...[
+                              const SizedBox(width: AppSpacing.xs),
+                              Icon(
+                                widget.trailingIcon,
+                                size: 18,
+                                color: foreground,
+                              ),
+                            ],
                           ],
-                        ],
+                        ),
                       ),
                     ),
                   ),
@@ -124,6 +134,25 @@ class _PillButtonState extends State<PillButton> {
           ),
         ),
       ),
+    );
+  }
+
+  /// Besedilo ostane v postavitvi (nevidno), da gumb ne spremeni velikosti.
+  Widget _withLoading(Color color, Widget content) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        AnimatedOpacity(
+          opacity: widget.loading ? 0 : 1,
+          duration: AppMotion.press,
+          child: content,
+        ),
+        if (widget.loading)
+          SizedBox.square(
+            dimension: 20,
+            child: CircularProgressIndicator(strokeWidth: 2, color: color),
+          ),
+      ],
     );
   }
 }
