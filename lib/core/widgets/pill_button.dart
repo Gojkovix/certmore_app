@@ -91,8 +91,9 @@ class _PillButtonState extends State<PillButton> {
                     horizontal: AppSpacing.xl,
                     vertical: AppSpacing.sm,
                   ),
-                  child: Center(
-                    widthFactor: 1,
+                  // Gumb vedno zavzame celotno razpoložljivo širino.
+                  child: Align(
+                    heightFactor: 1,
                     child: AnimatedDefaultTextStyle(
                       duration: AppMotion.selection,
                       style: AppTypography.button.copyWith(color: foreground),

@@ -27,6 +27,7 @@ class OnboardingProgress extends StatelessWidget {
           borderRadius: BorderRadius.circular(2),
           child: SizedBox(
             height: 3,
+            width: double.infinity,
             child: ColoredBox(
               color: AppColors.border,
               child: TweenAnimationBuilder<double>(
