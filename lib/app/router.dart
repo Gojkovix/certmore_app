@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../features/auth/presentation/login_screen.dart';
 import '../features/auth/presentation/register_screen.dart';
-import '../features/home/presentation/home_screen.dart';
 import '../features/onboarding/presentation/onboarding_screen.dart';
 import '../features/practice/models/practice_request.dart';
 import '../features/practice/presentation/practice_result_screen.dart';
 import '../features/practice/presentation/question_screen.dart';
 import '../features/progress/models/practice_record.dart';
+import '../features/shell/app_shell.dart';
 import '../features/welcome/presentation/welcome_screen.dart';
 
 /// Imena vseh rut na enem mestu.
@@ -33,7 +33,7 @@ Route<dynamic> onGenerateRoute(RouteSettings settings) {
     AppRoutes.onboarding => const OnboardingScreen(),
     AppRoutes.register => const RegisterScreen(),
     AppRoutes.login => const LoginScreen(),
-    AppRoutes.home => const HomeScreen(),
+    AppRoutes.home => const AppShell(),
     AppRoutes.practiceSession => QuestionScreen(
       request: settings.arguments! as PracticeRequest,
     ),

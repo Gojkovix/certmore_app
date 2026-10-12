@@ -32,6 +32,16 @@ Future<void> _openRegistration(WidgetTester tester) async {
   }
 }
 
+/// Odjava gre prek zavihka Profil in potrditvenega okna.
+Future<void> _signOut(WidgetTester tester) async {
+  await tester.tap(find.text('Profil'));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('Odjava'));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('Odjava').last);
+  await tester.pumpAndSettle();
+}
+
 Future<void> _register(WidgetTester tester) async {
   await tester.enterText(find.bySemanticsLabel('Ime'), 'Ana Novak');
   await tester.enterText(
@@ -92,8 +102,7 @@ void main() {
     await _openRegistration(tester);
     await _register(tester);
 
-    await tester.tap(find.text('Odjava'));
-    await tester.pumpAndSettle();
+    await _signOut(tester);
     expect(find.text('Začnimo'), findsOneWidget);
 
     await tester.tap(find.text('Prijava'));
@@ -119,8 +128,7 @@ void main() {
     await pumpApp(tester, storage: _answeredOnboarding);
     await _openRegistration(tester);
     await _register(tester);
-    await tester.tap(find.text('Odjava'));
-    await tester.pumpAndSettle();
+    await _signOut(tester);
 
     await _openRegistration(tester);
     await _register(tester);
