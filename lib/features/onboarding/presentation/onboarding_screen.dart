@@ -10,6 +10,7 @@ import '../../../core/widgets/fade_slide_in.dart';
 import '../../../core/widgets/pill_button.dart';
 import '../../../core/widgets/step_progress.dart';
 import '../models/onboarding_answers.dart';
+import 'exam_date_picker.dart';
 import 'widgets/selection_option.dart';
 
 /// Štirje kratki koraki, prikazani kot pogovor: eno vprašanje naenkrat,
@@ -84,17 +85,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Future<void> _pickExamDate() async {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _answers.examDate ?? today.add(const Duration(days: 30)),
-      firstDate: today,
-      lastDate: DateTime(today.year + 3, today.month, today.day),
-      helpText: 'Datum izpita',
+    final picked = await showExamDatePicker(
+      context,
+      current: _answers.examDate,
     );
     if (picked != null && mounted) {
-      _update(_answers.withExamDate(picked, today: today));
+      _update(_answers.withExamDate(picked, today: DateTime.now()));
     }
   }
 
