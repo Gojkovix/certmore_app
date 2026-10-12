@@ -5,6 +5,12 @@ import 'app_spacing.dart';
 import 'app_typography.dart';
 
 abstract final class AppTheme {
+  static OutlineInputBorder _inputBorder(Color color, {double width = 1}) =>
+      OutlineInputBorder(
+        borderRadius: AppRadii.controlRadius,
+        borderSide: BorderSide(color: color, width: width),
+      );
+
   static ThemeData get light {
     const colorScheme = ColorScheme.light(
       primary: AppColors.navy,
@@ -28,6 +34,33 @@ abstract final class AppTheme {
       highlightColor: AppColors.navy.withValues(alpha: 0.04),
       splashColor: AppColors.navy.withValues(alpha: 0.04),
       iconTheme: const IconThemeData(color: AppColors.textPrimary, size: 24),
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: AppColors.teal,
+        selectionColor: AppColors.teal.withValues(alpha: 0.2),
+        selectionHandleColor: AppColors.teal,
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: AppColors.surface,
+        hintStyle: AppTypography.body.copyWith(color: AppColors.muted),
+        errorStyle: AppTypography.caption.copyWith(color: AppColors.error),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.md,
+        ),
+        border: _inputBorder(AppColors.border),
+        enabledBorder: _inputBorder(AppColors.border),
+        focusedBorder: _inputBorder(AppColors.teal, width: 1.5),
+        errorBorder: _inputBorder(AppColors.error),
+        focusedErrorBorder: _inputBorder(AppColors.error, width: 1.5),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: AppColors.navy,
+          textStyle: AppTypography.label,
+          minimumSize: const Size(48, 48),
+        ),
+      ),
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
           TargetPlatform.android: _CertmorePageTransitionsBuilder(),
@@ -46,9 +79,8 @@ abstract final class AppTheme {
         todayForegroundColor: const WidgetStatePropertyAll(AppColors.teal),
         todayBorder: const BorderSide(color: AppColors.teal),
         dayBackgroundColor: WidgetStateProperty.resolveWith(
-          (states) => states.contains(WidgetState.selected)
-              ? AppColors.teal
-              : null,
+          (states) =>
+              states.contains(WidgetState.selected) ? AppColors.teal : null,
         ),
         confirmButtonStyle: TextButton.styleFrom(
           foregroundColor: AppColors.navy,
@@ -91,13 +123,17 @@ class _CertmorePageTransitionsBuilder extends PageTransitionsBuilder {
     );
 
     return SlideTransition(
-      position: Tween(begin: Offset.zero, end: const Offset(-0.04, 0))
-          .animate(outgoing),
+      position: Tween(
+        begin: Offset.zero,
+        end: const Offset(-0.04, 0),
+      ).animate(outgoing),
       child: FadeTransition(
         opacity: Tween(begin: 1.0, end: 0.0).animate(outgoing),
         child: SlideTransition(
-          position: Tween(begin: const Offset(0.06, 0), end: Offset.zero)
-              .animate(incoming),
+          position: Tween(
+            begin: const Offset(0.06, 0),
+            end: Offset.zero,
+          ).animate(incoming),
           child: FadeTransition(opacity: incoming, child: child),
         ),
       ),
