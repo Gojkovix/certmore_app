@@ -33,11 +33,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   bool get _isLastStep => _step == _stepCount - 1;
 
   bool get _canContinue => switch (_step) {
-        0 => _answers.discovery != null,
-        1 => _answers.goal != null,
-        2 => _answers.examTiming != null,
-        _ => _answers.knowledge != null,
-      };
+    0 => _answers.discovery != null,
+    1 => _answers.goal != null,
+    2 => _answers.examTiming != null,
+    _ => _answers.knowledge != null,
+  };
 
   void _update(OnboardingAnswers answers) => setState(() => _answers = answers);
 
@@ -63,11 +63,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Future<void> _complete() async {
     if (_completing) return;
     _completing = true;
-    await Navigator.pushNamed(
-      context,
-      AppRoutes.register,
-      arguments: _answers,
-    );
+    await Navigator.pushNamed(context, AppRoutes.register, arguments: _answers);
     _completing = false;
   }
 
@@ -146,43 +142,40 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget _buildStep() {
     return switch (_step) {
       0 => _ChoiceStep(
-          question: 'Kako si izvedel za Certmore?',
-          hint: 'Izberi eno možnost.',
-          values: DiscoverySource.values,
-          labelOf: (v) => v.label,
-          isSelected: (v) => _answers.discovery == v,
-          onSelect: (v) => _update(_answers.copyWith(discovery: v)),
-        ),
+        question: 'Kako si izvedel za Certmore?',
+        hint: 'Izberi eno možnost.',
+        values: DiscoverySource.values,
+        labelOf: (v) => v.label,
+        isSelected: (v) => _answers.discovery == v,
+        onSelect: (v) => _update(_answers.copyWith(discovery: v)),
+      ),
       1 => _ChoiceStep(
-          question: 'Kaj želiš doseči?',
-          hint: 'Prilagodili bomo tvojo izkušnjo.',
-          values: PreparationGoal.values,
-          labelOf: (v) => v.label,
-          isSelected: (v) => _answers.goal == v,
-          onSelect: (v) => _update(_answers.copyWith(goal: v)),
-        ),
+        question: 'Kaj želiš doseči?',
+        hint: 'Prilagodili bomo tvojo izkušnjo.',
+        values: PreparationGoal.values,
+        labelOf: (v) => v.label,
+        isSelected: (v) => _answers.goal == v,
+        onSelect: (v) => _update(_answers.copyWith(goal: v)),
+      ),
       2 => _ChoiceStep(
-          question: 'Kdaj imaš strokovni izpit?',
-          hint: 'Pomagali ti bomo organizirati pripravo.',
-          values: ExamTiming.values,
-          labelOf: (v) => v.label,
-          // Ko je izbran točen datum, je označen samo ta.
-          isSelected: (v) =>
-              _answers.examDate == null && _answers.examTiming == v,
-          onSelect: (v) => _update(_answers.withExamTiming(v)),
-          footer: _ExamDateOption(
-            date: _answers.examDate,
-            onTap: _pickExamDate,
-          ),
-        ),
+        question: 'Kdaj imaš strokovni izpit?',
+        hint: 'Pomagali ti bomo organizirati pripravo.',
+        values: ExamTiming.values,
+        labelOf: (v) => v.label,
+        // Ko je izbran točen datum, je označen samo ta.
+        isSelected: (v) =>
+            _answers.examDate == null && _answers.examTiming == v,
+        onSelect: (v) => _update(_answers.withExamTiming(v)),
+        footer: _ExamDateOption(date: _answers.examDate, onTap: _pickExamDate),
+      ),
       _ => _ChoiceStep(
-          question: 'Kako dobro poznaš izpitno snov?',
-          hint: 'Ni napačnega odgovora.',
-          values: KnowledgeLevel.values,
-          labelOf: (v) => v.label,
-          isSelected: (v) => _answers.knowledge == v,
-          onSelect: (v) => _update(_answers.copyWith(knowledge: v)),
-        ),
+        question: 'Kako dobro poznaš izpitno snov?',
+        hint: 'Ni napačnega odgovora.',
+        values: KnowledgeLevel.values,
+        labelOf: (v) => v.label,
+        isSelected: (v) => _answers.knowledge == v,
+        onSelect: (v) => _update(_answers.copyWith(knowledge: v)),
+      ),
     };
   }
 }
@@ -301,10 +294,7 @@ class _ChoiceStep<T> extends StatelessWidget {
           ],
           if (footer != null) ...[
             const SizedBox(height: AppSpacing.lg),
-            FadeSlideIn(
-              delay: _delay(values.length + 2),
-              child: footer!,
-            ),
+            FadeSlideIn(delay: _delay(values.length + 2), child: footer!),
           ],
         ],
       ),
