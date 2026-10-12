@@ -5,7 +5,9 @@ import '../features/auth/presentation/register_screen.dart';
 import '../features/home/presentation/home_screen.dart';
 import '../features/onboarding/presentation/onboarding_screen.dart';
 import '../features/practice/models/practice_request.dart';
+import '../features/practice/presentation/practice_result_screen.dart';
 import '../features/practice/presentation/question_screen.dart';
+import '../features/progress/models/practice_record.dart';
 import '../features/welcome/presentation/welcome_screen.dart';
 
 /// Imena vseh rut na enem mestu.
@@ -19,7 +21,7 @@ abstract final class AppRoutes {
   /// Argument: [PracticeRequest].
   static const practiceSession = '/practice/session';
 
-  /// Argument: PracticeRecord (zaključena vaja).
+  /// Argument: [PracticeRecord] (zaključena vaja).
   static const practiceResult = '/practice/result';
 }
 
@@ -34,6 +36,9 @@ Route<dynamic> onGenerateRoute(RouteSettings settings) {
     AppRoutes.home => const HomeScreen(),
     AppRoutes.practiceSession => QuestionScreen(
       request: settings.arguments! as PracticeRequest,
+    ),
+    AppRoutes.practiceResult => PracticeResultScreen(
+      record: settings.arguments! as PracticeRecord,
     ),
     _ => const WelcomeScreen(),
   };
