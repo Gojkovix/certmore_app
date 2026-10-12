@@ -8,8 +8,8 @@ import '../../../../core/widgets/pill_button.dart';
 /// Skupna postavitev za registracijo in prijavo: naslov, kratek opis,
 /// polja, eno glavno dejanje in sekundarna povezava.
 ///
-/// Vsebina se pomika, zato glavni gumb pri odprti tipkovnici nikoli
-/// ne izgine pod njo.
+/// Polja se pomikajo, glavni gumb pa je pritrjen spodaj, zato pri odprti
+/// tipkovnici nikoli ne izgine pod njo.
 class AuthFormLayout extends StatelessWidget {
   const AuthFormLayout({
     super.key,
@@ -37,20 +37,24 @@ class AuthFormLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final error = this.error;
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
 
+    // Obrazec se pomika, dejanja pa so pritrjena spodaj — ko se odpre
+    // tipkovnica, se Scaffold skrči in gumb ostane tik nad njo.
     return Scaffold(
       body: SafeArea(
-        child: CustomScrollView(
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          slivers: [
-            SliverFillRemaining(
-              hasScrollBody: false,
-              child: Padding(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
                 padding: const EdgeInsets.fromLTRB(
                   AppSpacing.page,
                   AppSpacing.xs,
                   AppSpacing.page,
-                  AppSpacing.md,
+                  AppSpacing.xl,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -92,21 +96,32 @@ class AuthFormLayout extends StatelessWidget {
                               child: _FormError(message: error),
                             ),
                     ),
-                    const SizedBox(height: AppSpacing.xxl),
-                    const Spacer(),
-                    PillButton(
-                      label: primaryLabel,
-                      onPressed: onPrimary,
-                      loading: loading,
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    secondary,
-                    if (showDemoNotice) ...[
-                      const SizedBox(height: AppSpacing.xs),
-                      const _DemoNotice(),
-                    ],
                   ],
                 ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.page,
+                AppSpacing.xs,
+                AppSpacing.page,
+                AppSpacing.md,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  PillButton(
+                    label: primaryLabel,
+                    onPressed: onPrimary,
+                    loading: loading,
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  secondary,
+                  if (showDemoNotice && !keyboardOpen) ...[
+                    const SizedBox(height: AppSpacing.xs),
+                    const _DemoNotice(),
+                  ],
+                ],
               ),
             ),
           ],
