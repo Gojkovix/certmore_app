@@ -8,8 +8,8 @@ import '../../../app/theme/app_typography.dart';
 import '../../../core/utils/date_format.dart';
 import '../../../core/widgets/fade_slide_in.dart';
 import '../../../core/widgets/pill_button.dart';
+import '../../../core/widgets/step_progress.dart';
 import '../models/onboarding_answers.dart';
-import 'widgets/onboarding_progress.dart';
 import 'widgets/selection_option.dart';
 
 /// Štirje kratki koraki, prikazani kot pogovor: eno vprašanje naenkrat,
@@ -114,7 +114,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               _TopBar(step: _step, total: _stepCount, onBack: _back),
               Padding(
                 padding: AppSpacing.pagePadding,
-                child: OnboardingProgress(step: _step, total: _stepCount),
+                child: StepProgress(step: _step, total: _stepCount),
               ),
               Expanded(
                 // Prejšnji korak hitro zbledi, novi se pojavi takoj, a
