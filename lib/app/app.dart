@@ -2,22 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
-import '../features/auth/auth_controller.dart';
-import '../features/onboarding/data/onboarding_store.dart';
 import 'app_scope.dart';
 import 'router.dart';
 import 'theme/app_colors.dart';
 import 'theme/app_theme.dart';
 
 class CertmoreApp extends StatelessWidget {
-  const CertmoreApp({
-    super.key,
-    required this.auth,
-    required this.onboardingStore,
-  });
+  const CertmoreApp({super.key, required this.services});
 
-  final AuthController auth;
-  final OnboardingStore onboardingStore;
+  final AppServices services;
 
   static const _systemUiStyle = SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
@@ -32,8 +25,7 @@ class CertmoreApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AppScope(
-      auth: auth,
-      onboardingStore: onboardingStore,
+      services: services,
       child: MaterialApp(
         title: 'Certmore',
         debugShowCheckedModeBanner: false,
@@ -47,7 +39,9 @@ class CertmoreApp extends StatelessWidget {
         onGenerateInitialRoutes: (_) => [
           onGenerateRoute(
             RouteSettings(
-              name: auth.isSignedIn ? AppRoutes.home : AppRoutes.welcome,
+              name: services.auth.isSignedIn
+                  ? AppRoutes.home
+                  : AppRoutes.welcome,
             ),
           ),
         ],

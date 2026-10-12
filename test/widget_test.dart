@@ -1,32 +1,8 @@
-import 'package:certmore/app/app.dart';
-import 'package:certmore/features/auth/auth_controller.dart';
-import 'package:certmore/features/auth/data/local_auth_repository.dart';
-import 'package:certmore/features/onboarding/data/onboarding_store.dart';
 import 'package:certmore/features/onboarding/presentation/widgets/selection_option.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-/// Testi tečejo z vklopljenim "zmanjšaj gibanje", zato se typewriter ne
-/// vrti in pumpAndSettle zanesljivo konča.
-Future<void> _pumpApp(
-  WidgetTester tester, {
-  Map<String, Object> storage = const {},
-}) async {
-  tester.platformDispatcher.accessibilityFeaturesTestValue =
-      const FakeAccessibilityFeatures(disableAnimations: true);
-  addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
-
-  SharedPreferences.setMockInitialValues(storage);
-  final prefs = await SharedPreferences.getInstance();
-  final auth = AuthController(LocalAuthRepository(prefs));
-  await auth.restore();
-
-  await tester.pumpWidget(
-    CertmoreApp(auth: auth, onboardingStore: OnboardingStore(prefs)),
-  );
-  await tester.pumpAndSettle();
-}
+import 'test_app.dart';
 
 Finder _continueButton() =>
     find.ancestor(of: find.text('Nadaljuj'), matching: find.byType(InkWell));
@@ -36,7 +12,7 @@ bool _isEnabled(WidgetTester tester) =>
 
 void main() {
   testWidgets('welcome prikaže statično frazo in oba gumba', (tester) async {
-    await _pumpApp(tester);
+    await pumpApp(tester);
 
     expect(find.textContaining('Tvoje znanje. Preverjeno.'), findsWidgets);
     expect(find.text('Začnimo'), findsOneWidget);
@@ -46,7 +22,7 @@ void main() {
   testWidgets('onboarding: izbira, napredovanje in ohranjanje odgovorov', (
     tester,
   ) async {
-    await _pumpApp(tester);
+    await pumpApp(tester);
     await tester.tap(find.text('Začnimo'));
     await tester.pumpAndSettle();
 
@@ -92,12 +68,11 @@ void main() {
     await tester.tap(find.text('Nadaljuj'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Ustvari račun'), findsOneWidget);
-    expect(find.text('Cilj: Začenjam s pripravami.'), findsOneWidget);
+    expect(find.text('Že imaš račun? Prijava'), findsOneWidget);
   });
 
   testWidgets('sistemski nazaj vrača po korakih', (tester) async {
-    await _pumpApp(tester);
+    await pumpApp(tester);
     await tester.tap(find.text('Začnimo'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Instagram'));
@@ -121,7 +96,7 @@ void main() {
     addTearDown(tester.view.reset);
     addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
 
-    await _pumpApp(tester);
+    await pumpApp(tester);
     expect(tester.takeException(), isNull);
 
     await tester.ensureVisible(find.text('Začnimo'));

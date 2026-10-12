@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 
-import '../features/auth/presentation/auth_pending_screen.dart';
-import '../features/home/presentation/home_screen.dart';
-import '../features/onboarding/models/onboarding_answers.dart';
+import '../features/auth/presentation/login_screen.dart';
+import '../features/auth/presentation/register_screen.dart';
 import '../features/onboarding/presentation/onboarding_screen.dart';
+import '../features/practice/models/practice_request.dart';
+import '../features/practice/presentation/practice_result_screen.dart';
+import '../features/practice/presentation/question_screen.dart';
+import '../features/progress/models/practice_record.dart';
+import '../features/shell/app_shell.dart';
 import '../features/welcome/presentation/welcome_screen.dart';
 
 /// Imena vseh rut na enem mestu.
@@ -13,6 +17,12 @@ abstract final class AppRoutes {
   static const register = '/register';
   static const login = '/login';
   static const home = '/home';
+
+  /// Argument: [PracticeRequest].
+  static const practiceSession = '/practice/session';
+
+  /// Argument: [PracticeRecord] (zaključena vaja).
+  static const practiceResult = '/practice/result';
 }
 
 /// Za trenutno število zaslonov zadošča vgrajeni Navigator; go_router
@@ -21,11 +31,15 @@ abstract final class AppRoutes {
 Route<dynamic> onGenerateRoute(RouteSettings settings) {
   final Widget page = switch (settings.name) {
     AppRoutes.onboarding => const OnboardingScreen(),
-    AppRoutes.register => AuthPendingScreen.register(
-      answers: settings.arguments as OnboardingAnswers?,
+    AppRoutes.register => const RegisterScreen(),
+    AppRoutes.login => const LoginScreen(),
+    AppRoutes.home => const AppShell(),
+    AppRoutes.practiceSession => QuestionScreen(
+      request: settings.arguments! as PracticeRequest,
     ),
-    AppRoutes.login => const AuthPendingScreen.login(),
-    AppRoutes.home => const HomeScreen(),
+    AppRoutes.practiceResult => PracticeResultScreen(
+      record: settings.arguments! as PracticeRecord,
+    ),
     _ => const WelcomeScreen(),
   };
 

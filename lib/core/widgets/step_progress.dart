@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../../../../app/theme/app_colors.dart';
-import '../../../../app/theme/app_spacing.dart';
+import '../../app/theme/app_colors.dart';
+import '../../app/theme/app_spacing.dart';
 
-/// Tanka vrstica napredka. Ob spremembi koraka gladko zdrsne na novo
-/// vrednost.
-class OnboardingProgress extends StatelessWidget {
-  const OnboardingProgress({
-    super.key,
-    required this.step,
-    required this.total,
-  });
+/// Tanka vrstica napredka (onboarding, vaja). Ob spremembi koraka gladko
+/// zdrsne na novo vrednost.
+class StepProgress extends StatelessWidget {
+  const StepProgress({super.key, required this.step, required this.total});
 
   /// Trenutni korak, začenši z 0.
   final int step;

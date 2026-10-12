@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/onboarding_answers.dart';
@@ -9,7 +10,10 @@ import '../models/onboarding_answers.dart';
 ///
 /// Ko bo znan Certmore API, se bodo odgovori ob registraciji poslali
 /// tudi na strežnik.
-class OnboardingStore {
+///
+/// Ob vsaki spremembi obvesti poslušalce (npr. Domov prikaže nov datum
+/// izpita, ko ga uporabnik spremeni v Profilu).
+class OnboardingStore extends ChangeNotifier {
   OnboardingStore(this._prefs);
 
   final SharedPreferences _prefs;
@@ -20,12 +24,16 @@ class OnboardingStore {
     final raw = _prefs.getString(_key);
     if (raw == null) return null;
     try {
-      return OnboardingAnswers.fromJson(jsonDecode(raw) as Map<String, Object?>);
+      return OnboardingAnswers.fromJson(
+        jsonDecode(raw) as Map<String, Object?>,
+      );
     } on FormatException {
       return null;
     }
   }
 
-  Future<void> save(OnboardingAnswers answers) =>
-      _prefs.setString(_key, jsonEncode(answers.toJson()));
+  Future<void> save(OnboardingAnswers answers) async {
+    await _prefs.setString(_key, jsonEncode(answers.toJson()));
+    notifyListeners();
+  }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../app/app_scope.dart';
 import '../../../app/router.dart';
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_spacing.dart';
@@ -7,8 +8,9 @@ import '../../../app/theme/app_typography.dart';
 import '../../../core/utils/date_format.dart';
 import '../../../core/widgets/fade_slide_in.dart';
 import '../../../core/widgets/pill_button.dart';
+import '../../../core/widgets/step_progress.dart';
 import '../models/onboarding_answers.dart';
-import 'widgets/onboarding_progress.dart';
+import 'exam_date_picker.dart';
 import 'widgets/selection_option.dart';
 
 /// Štirje kratki koraki, prikazani kot pogovor: eno vprašanje naenkrat,
@@ -29,17 +31,32 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   int _step = 0;
   OnboardingAnswers _answers = const OnboardingAnswers();
   bool _completing = false;
+  bool _restored = false;
+
+  /// InheritedWidget (AppScope) v initState še ni dostopen,
+  /// zato prejšnje odgovore naložimo tukaj — samo enkrat.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_restored) return;
+    _restored = true;
+    _answers = AppScope.of(context).onboardingStore.load() ?? _answers;
+  }
 
   bool get _isLastStep => _step == _stepCount - 1;
 
   bool get _canContinue => switch (_step) {
-        0 => _answers.discovery != null,
-        1 => _answers.goal != null,
-        2 => _answers.examTiming != null,
-        _ => _answers.knowledge != null,
-      };
+    0 => _answers.discovery != null,
+    1 => _answers.goal != null,
+    2 => _answers.examTiming != null,
+    _ => _answers.knowledge != null,
+  };
 
-  void _update(OnboardingAnswers answers) => setState(() => _answers = answers);
+  /// Vsako izbiro takoj shranimo, da se ob zaprtju aplikacije ne izgubi.
+  void _update(OnboardingAnswers answers) {
+    setState(() => _answers = answers);
+    AppScope.of(context).onboardingStore.save(answers);
+  }
 
   void _next() {
     if (!_canContinue) return;
@@ -63,26 +80,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Future<void> _complete() async {
     if (_completing) return;
     _completing = true;
-    await Navigator.pushNamed(
-      context,
-      AppRoutes.register,
-      arguments: _answers,
-    );
+    await Navigator.pushNamed(context, AppRoutes.register);
     _completing = false;
   }
 
   Future<void> _pickExamDate() async {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _answers.examDate ?? today.add(const Duration(days: 30)),
-      firstDate: today,
-      lastDate: DateTime(today.year + 3, today.month, today.day),
-      helpText: 'Datum izpita',
+    final picked = await showExamDatePicker(
+      context,
+      current: _answers.examDate,
     );
     if (picked != null && mounted) {
-      _update(_answers.withExamDate(picked, today: today));
+      _update(_answers.withExamDate(picked, today: DateTime.now()));
     }
   }
 
@@ -102,7 +110,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               _TopBar(step: _step, total: _stepCount, onBack: _back),
               Padding(
                 padding: AppSpacing.pagePadding,
-                child: OnboardingProgress(step: _step, total: _stepCount),
+                child: StepProgress(step: _step, total: _stepCount),
               ),
               Expanded(
                 // Prejšnji korak hitro zbledi, novi se pojavi takoj, a
@@ -146,43 +154,40 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget _buildStep() {
     return switch (_step) {
       0 => _ChoiceStep(
-          question: 'Kako si izvedel za Certmore?',
-          hint: 'Izberi eno možnost.',
-          values: DiscoverySource.values,
-          labelOf: (v) => v.label,
-          isSelected: (v) => _answers.discovery == v,
-          onSelect: (v) => _update(_answers.copyWith(discovery: v)),
-        ),
+        question: 'Kako si izvedel za Certmore?',
+        hint: 'Izberi eno možnost.',
+        values: DiscoverySource.values,
+        labelOf: (v) => v.label,
+        isSelected: (v) => _answers.discovery == v,
+        onSelect: (v) => _update(_answers.copyWith(discovery: v)),
+      ),
       1 => _ChoiceStep(
-          question: 'Kaj želiš doseči?',
-          hint: 'Prilagodili bomo tvojo izkušnjo.',
-          values: PreparationGoal.values,
-          labelOf: (v) => v.label,
-          isSelected: (v) => _answers.goal == v,
-          onSelect: (v) => _update(_answers.copyWith(goal: v)),
-        ),
+        question: 'Kaj želiš doseči?',
+        hint: 'Prilagodili bomo tvojo izkušnjo.',
+        values: PreparationGoal.values,
+        labelOf: (v) => v.label,
+        isSelected: (v) => _answers.goal == v,
+        onSelect: (v) => _update(_answers.copyWith(goal: v)),
+      ),
       2 => _ChoiceStep(
-          question: 'Kdaj imaš strokovni izpit?',
-          hint: 'Pomagali ti bomo organizirati pripravo.',
-          values: ExamTiming.values,
-          labelOf: (v) => v.label,
-          // Ko je izbran točen datum, je označen samo ta.
-          isSelected: (v) =>
-              _answers.examDate == null && _answers.examTiming == v,
-          onSelect: (v) => _update(_answers.withExamTiming(v)),
-          footer: _ExamDateOption(
-            date: _answers.examDate,
-            onTap: _pickExamDate,
-          ),
-        ),
+        question: 'Kdaj imaš strokovni izpit?',
+        hint: 'Pomagali ti bomo organizirati pripravo.',
+        values: ExamTiming.values,
+        labelOf: (v) => v.label,
+        // Ko je izbran točen datum, je označen samo ta.
+        isSelected: (v) =>
+            _answers.examDate == null && _answers.examTiming == v,
+        onSelect: (v) => _update(_answers.withExamTiming(v)),
+        footer: _ExamDateOption(date: _answers.examDate, onTap: _pickExamDate),
+      ),
       _ => _ChoiceStep(
-          question: 'Kako dobro poznaš izpitno snov?',
-          hint: 'Ni napačnega odgovora.',
-          values: KnowledgeLevel.values,
-          labelOf: (v) => v.label,
-          isSelected: (v) => _answers.knowledge == v,
-          onSelect: (v) => _update(_answers.copyWith(knowledge: v)),
-        ),
+        question: 'Kako dobro poznaš izpitno snov?',
+        hint: 'Ni napačnega odgovora.',
+        values: KnowledgeLevel.values,
+        labelOf: (v) => v.label,
+        isSelected: (v) => _answers.knowledge == v,
+        onSelect: (v) => _update(_answers.copyWith(knowledge: v)),
+      ),
     };
   }
 }
@@ -301,10 +306,7 @@ class _ChoiceStep<T> extends StatelessWidget {
           ],
           if (footer != null) ...[
             const SizedBox(height: AppSpacing.lg),
-            FadeSlideIn(
-              delay: _delay(values.length + 2),
-              child: footer!,
-            ),
+            FadeSlideIn(delay: _delay(values.length + 2), child: footer!),
           ],
         ],
       ),
