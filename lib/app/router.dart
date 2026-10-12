@@ -4,6 +4,8 @@ import '../features/auth/presentation/login_screen.dart';
 import '../features/auth/presentation/register_screen.dart';
 import '../features/home/presentation/home_screen.dart';
 import '../features/onboarding/presentation/onboarding_screen.dart';
+import '../features/practice/models/practice_request.dart';
+import '../features/practice/presentation/question_screen.dart';
 import '../features/welcome/presentation/welcome_screen.dart';
 
 /// Imena vseh rut na enem mestu.
@@ -13,6 +15,12 @@ abstract final class AppRoutes {
   static const register = '/register';
   static const login = '/login';
   static const home = '/home';
+
+  /// Argument: [PracticeRequest].
+  static const practiceSession = '/practice/session';
+
+  /// Argument: PracticeRecord (zaključena vaja).
+  static const practiceResult = '/practice/result';
 }
 
 /// Za trenutno število zaslonov zadošča vgrajeni Navigator; go_router
@@ -24,6 +32,9 @@ Route<dynamic> onGenerateRoute(RouteSettings settings) {
     AppRoutes.register => const RegisterScreen(),
     AppRoutes.login => const LoginScreen(),
     AppRoutes.home => const HomeScreen(),
+    AppRoutes.practiceSession => QuestionScreen(
+      request: settings.arguments! as PracticeRequest,
+    ),
     _ => const WelcomeScreen(),
   };
 
