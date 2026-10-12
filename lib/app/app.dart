@@ -2,12 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
+import '../features/auth/auth_controller.dart';
+import '../features/onboarding/data/onboarding_store.dart';
+import 'app_scope.dart';
 import 'router.dart';
 import 'theme/app_colors.dart';
 import 'theme/app_theme.dart';
 
 class CertmoreApp extends StatelessWidget {
-  const CertmoreApp({super.key});
+  const CertmoreApp({
+    super.key,
+    required this.auth,
+    required this.onboardingStore,
+  });
+
+  final AuthController auth;
+  final OnboardingStore onboardingStore;
 
   static const _systemUiStyle = SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
@@ -21,19 +31,31 @@ class CertmoreApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Certmore',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.light,
-      color: AppColors.background,
-      locale: const Locale('sl'),
-      supportedLocales: const [Locale('sl')],
-      localizationsDelegates: GlobalMaterialLocalizations.delegates,
-      initialRoute: AppRoutes.welcome,
-      onGenerateRoute: onGenerateRoute,
-      builder: (context, child) => AnnotatedRegion<SystemUiOverlayStyle>(
-        value: _systemUiStyle,
-        child: child!,
+    return AppScope(
+      auth: auth,
+      onboardingStore: onboardingStore,
+      child: MaterialApp(
+        title: 'Certmore',
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.light,
+        color: AppColors.background,
+        locale: const Locale('sl'),
+        supportedLocales: const [Locale('sl')],
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
+        // Prijavljen uporabnik gre naravnost na Domov. Uporabimo samo eno
+        // začetno ruto, da "nazaj" z Domov ne vodi na welcome.
+        onGenerateInitialRoutes: (_) => [
+          onGenerateRoute(
+            RouteSettings(
+              name: auth.isSignedIn ? AppRoutes.home : AppRoutes.welcome,
+            ),
+          ),
+        ],
+        onGenerateRoute: onGenerateRoute,
+        builder: (context, child) => AnnotatedRegion<SystemUiOverlayStyle>(
+          value: _systemUiStyle,
+          child: child!,
+        ),
       ),
     );
   }
