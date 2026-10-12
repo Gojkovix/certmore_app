@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../app/app_scope.dart';
 import '../../../app/router.dart';
 import '../../../app/theme/app_colors.dart';
+import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/app_typography.dart';
 import '../../../core/utils/validators.dart';
 import '../../../core/widgets/app_text_field.dart';
@@ -106,15 +107,20 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 Align(
                   alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: _loading ? null : _forgotPassword,
-                    style: TextButton.styleFrom(
-                      foregroundColor: AppColors.textSecondary,
-                      textStyle: AppTypography.label.copyWith(
-                        fontWeight: FontWeight.w500,
+                  // Besedilo poravnano z desnim robom polja (gumb ima
+                  // 12 px notranjega odmika).
+                  child: Transform.translate(
+                    offset: const Offset(AppSpacing.sm, 0),
+                    child: TextButton(
+                      onPressed: _loading ? null : _forgotPassword,
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.textSecondary,
+                        textStyle: AppTypography.label.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
+                      child: const Text('Pozabljeno geslo?'),
                     ),
-                    child: const Text('Pozabljeno geslo?'),
                   ),
                 ),
               ],
